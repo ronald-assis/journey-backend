@@ -2,11 +2,11 @@ import {Router} from 'express'
 
 import {TripsController} from "../controllers/TripsController";
 
-const vai = Router()
+const tripsRouter = Router()
 const controller = new TripsController()
 
-vai.post('/', controller.createTrip)
-vai.get('/:tripId/confirm', controller.confirmTrip)
+tripsRouter.post('/', controller.createTrip)
+tripsRouter.get('/:tripId/confirm', controller.confirmTrip)
 
 
-export { vai }
+export { tripsRouter }

@@ -1,10 +1,8 @@
 import {Router} from "express";
-import {vai} from "./tripsRouter";
-// import {tripsRouter} from "./trips.router";
+import {tripsRouter} from "./tripsRouter";
 
 const router = Router()
 
-// router.use('/trips', tripsRouter)
-router.use('/v', vai)
+router.use('/trips', tripsRouter)
 
 export { router }
