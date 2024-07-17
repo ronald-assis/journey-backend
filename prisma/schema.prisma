@@ -17,7 +17,7 @@ model Trip {
 
   participants Participant[]
 
-  @@map("trips") // rename of table
+  @@map("tripsRouter") // rename of table
 }
 
 model Participant {

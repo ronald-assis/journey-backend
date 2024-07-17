@@ -1,15 +1,24 @@
-import dayjs from 'dayjs';
 import nodemailer from 'nodemailer';
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat"
+
 import { ITripCreate, ITripCreateResponse } from '../types/trips.types';
-import { TripsModel } from '../models/trips.model';
-import { getMailClient } from '../lib/mail';
+import {TripsModel} from '../models/tripsModel'
+
+dayjs.locale('pt-br')
+dayjs.extend(localizedFormat)
 
 export class TripsService {
-  async createTrip(data: ITripCreate): Promise<ITripCreateResponse> {
+  private readonly model: TripsModel
+
+  constructor() {
+    this.model = new TripsModel()
+  }
+
+  public async createTrip(data: ITripCreate): Promise<ITripCreateResponse> {
     const {
       destination,
       ends_at,
-      emails_to_invite,
       owner_name,
       starts_at,
       owner_email,
@@ -23,31 +32,23 @@ export class TripsService {
       throw new Error('Invalid trip end date!');
     }
 
-    const trip = await TripsModel.createTrip({
-      destination,
-      starts_at,
-      ends_at,
-      participants: {
-        createMany: {
-          data: [
-            {
-              name: owner_name,
-              email: owner_email,
-              is_owner: true,
-              is_confirmed: true,
-            },
-            ...emails_to_invite.map((email: string) => ({ email })),
-          ],
-        },
-      },
-    });
+    const trip = await this.model.createTrips(data);
 
     const formattedStartDate = dayjs(starts_at).format('LL');
     const formattedEndDate = dayjs(ends_at).format('LL');
+    const account = await nodemailer.createTestAccount()
 
     const confirmationLink = `http://localhost:3333/api/trips/${trip.id}/confirm`;
 
-    const mail = await getMailClient();
+    const mail = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+            user: account.user,
+            pass: account.pass,
+        }
+    })
 
     const message = await mail.sendMail({
       from: {
